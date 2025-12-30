@@ -543,6 +543,16 @@
             color: #CC0000;
             margin-bottom: 20px;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .game-screen-title .mode-icon {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
         }
 
 
@@ -919,6 +929,121 @@
             50% { transform: scale(1.05); }
         }
 
+        .share-button {
+            background: #28a745;
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+
+        .share-button:hover {
+            transform: translateY(-2px);
+            background: #218838;
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        }
+
+        .share-button:active {
+            transform: translateY(0);
+        }
+
+        .share-preview-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .share-preview-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .share-preview-box h3 {
+            margin: 0 0 20px 0;
+            color: #CC0000;
+            text-align: center;
+            font-size: 1.4em;
+        }
+
+        .share-preview-text {
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .share-preview-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .share-copy-button {
+            background: #28a745;
+            color: white;
+            font-size: 1em;
+            font-weight: bold;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .share-copy-button:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .share-copy-button.copied {
+            background: #218838;
+        }
+
+        .share-close-button {
+            background: #666;
+            color: white;
+            font-size: 1em;
+            font-weight: bold;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .share-close-button:hover {
+            background: #555;
+            transform: translateY(-2px);
+        }
+
         .play-again-button {
             background: #3B4CCA;
             color: white;
@@ -1031,7 +1156,7 @@
         .sprite-toggle {
             position: absolute;
             bottom: 16px;
-            right: 16px;
+            right: 10px;
             width: 32px;
             height: 32px;
             background: rgba(255, 255, 255, 0.8);
@@ -1179,7 +1304,10 @@
 
             <!-- Game Screen -->
             <div id="game-screen" class="hidden">
-                <h2 class="game-screen-title">Guess the Pokémon!</h2>
+                <h2 class="game-screen-title">
+                    <div class="mode-icon" id="game-mode-icon"></div>
+                    <span id="game-mode-title">Guess the Pokémon!</span>
+                </h2>
 
                 <div class="generation-display hidden" id="generation-display">Gens: I-IX</div>
 
@@ -1190,7 +1318,7 @@
                     <div class="score-label">Correct</div>
                     <div class="score-value correct" id="correct-score">0</div>
                 </div>
-                <div class="score-item">
+                <div class="score-item" id="incorrect-score-item">
                     <div class="score-label">Incorrect</div>
                     <div class="score-value incorrect" id="incorrect-score">0</div>
                 </div>
@@ -1238,8 +1366,20 @@
                 <div id="new-high-score-badge" class="new-high-score hidden">🎉 New High Score! 🎉</div>
             </div>
 
+            <button class="share-button" id="share-button">Share Results</button>
             <button class="play-again-button" id="play-again-button">Play Again</button>
             <button class="menu-button" id="menu-button">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="share-preview-overlay hidden" id="share-preview-overlay">
+        <div class="share-preview-box">
+            <h3>Share Your Results</h3>
+            <div class="share-preview-text" id="share-preview-text"></div>
+            <div class="share-preview-buttons">
+                <button class="share-copy-button" id="share-copy-button">Copy to Clipboard</button>
+                <button class="share-close-button" id="share-close-button">Close</button>
             </div>
         </div>
     </div>
@@ -1286,6 +1426,7 @@
         const playAgainButton = document.getElementById('play-again-button');
         const menuButton = document.getElementById('menu-button');
         const quitButton = document.getElementById('quit-button');
+        const shareButton = document.getElementById('share-button');
         const highScoreClassic = document.getElementById('highscore-classic');
         const highScoreStreak = document.getElementById('highscore-streak');
         const highScoreSilhouette = document.getElementById('highscore-silhouette');
@@ -1301,8 +1442,11 @@
         const loading = document.getElementById('loading');
         const correctScore = document.getElementById('correct-score');
         const incorrectScore = document.getElementById('incorrect-score');
+        const incorrectScoreItem = document.getElementById('incorrect-score-item');
         const generationDisplay = document.getElementById('generation-display');
         const spriteToggle = document.getElementById('sprite-toggle');
+        const gameModeIcon = document.getElementById('game-mode-icon');
+        const gameModeTitle = document.getElementById('game-mode-title');
 
         // Levenshtein distance for fuzzy matching
         function levenshteinDistance(str1, str2) {
@@ -1378,6 +1522,22 @@
             menuScreen.classList.add('hidden');
             gameOverScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
+
+            // Set game mode title and icon
+            if (gameMode === 'classic') {
+                gameModeTitle.textContent = 'Classic Mode';
+                gameModeIcon.className = 'mode-icon icon-classic';
+                incorrectScoreItem.style.display = 'flex';
+            } else if (gameMode === 'streak') {
+                gameModeTitle.textContent = 'Longest Streak';
+                gameModeIcon.className = 'mode-icon icon-streak';
+                incorrectScoreItem.style.display = 'none';
+            } else if (gameMode === 'silhouette') {
+                gameModeTitle.textContent = "Who's That Pokémon?";
+                gameModeIcon.className = 'mode-icon icon-silhouette';
+                gameModeIcon.innerHTML = '<div class="question-mark">?</div>';
+                incorrectScoreItem.style.display = 'flex';
+            }
 
             // Show generation display
             updateGenerationDisplay();
@@ -1879,11 +2039,46 @@
             selectAllBtn.textContent = allSelected ? 'Deselect All' : 'Select All';
         }
 
+        // Share results function
+        function shareResults() {
+            const modeName = gameMode === 'classic' ? 'Classic' :
+                           gameMode === 'streak' ? 'Longest Streak' :
+                           'Who\'s That Pokémon?';
+            const finalScore = correctCount;
+            const totalAttempts = correctCount + incorrectCount;
+            const accuracy = totalAttempts > 0 ? Math.round((correctCount / totalAttempts) * 100) : 0;
+
+            // Generate region list
+            const regionNames = ['Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Unova', 'Kalos', 'Alola', 'Galar', 'Paldea'];
+            const regions = selectedGenerations.length === 9 ? 'All Regions' :
+                           selectedGenerations.map(g => regionNames[g - 1]).join(', ');
+
+            const message = `⚡ *Pokémon Flashcards* ⚡
+Mode: ${modeName}
+Score: ${finalScore} / ${totalAttempts} (${accuracy}%)
+Regions: ${regions}
+
+Can you beat my score? 🎮`;
+
+            navigator.clipboard.writeText(message).then(() => {
+                const originalText = shareButton.textContent;
+                shareButton.textContent = '✓ Copied!';
+                shareButton.style.background = '#218838';
+                setTimeout(() => {
+                    shareButton.textContent = originalText;
+                    shareButton.style.background = '#28a745';
+                }, 2000);
+            }).catch(err => {
+                alert('Failed to copy to clipboard. Please try again.');
+            });
+        }
+
         // Event listeners
         startButton.addEventListener('click', startGame);
         playAgainButton.addEventListener('click', startGame);
         menuButton.addEventListener('click', returnToMenu);
         quitButton.addEventListener('click', quitGame);
+        shareButton.addEventListener('click', shareResults);
         checkBtn.addEventListener('click', checkAnswer);
         skipBtn.addEventListener('click', skipPokemon);
 
@@ -1929,6 +2124,16 @@
                 musicPlaying = false;
                 localStorage.setItem('musicEnabled', 'false');
             } else {
+                // Determine which music to play based on game state
+                if (gameActive) {
+                    currentMusic = battleMusic;
+                } else if (!menuScreen.classList.contains('hidden')) {
+                    currentMusic = menuMusic;
+                } else if (!gameOverScreen.classList.contains('hidden')) {
+                    currentMusic = victoryMusic;
+                } else {
+                    currentMusic = menuMusic; // Default fallback
+                }
                 currentMusic.play().catch(e => console.log('Music play failed:', e));
                 musicToggle.textContent = '🔊';
                 musicPlaying = true;
