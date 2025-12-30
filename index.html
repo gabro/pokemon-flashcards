@@ -988,7 +988,6 @@
             border: 2px solid #ddd;
             border-radius: 10px;
             padding: 20px;
-            font-family: monospace;
             white-space: pre-wrap;
             word-wrap: break-word;
             margin-bottom: 20px;
@@ -996,6 +995,10 @@
             overflow-y: auto;
             font-size: 0.95em;
             line-height: 1.6;
+        }
+
+        .share-preview-text strong {
+            font-weight: bold;
         }
 
         .share-preview-buttons {
@@ -1244,6 +1247,7 @@
     <audio id="victory-music">
         <source src="https://jetta.vgmtreasurechest.com/soundtracks/pokemon-game-boy-pok-mon-sound-complete-set-play-cd/jtoodasn/1-16.%20Victory%20%28VS%20Trainer%29.mp3" type="audio/mpeg">
     </audio>
+    <audio id="pokemon-cry"></audio>
 
     <div class="game-container">
         <div class="game-content">
@@ -1744,6 +1748,11 @@
 
                 pokemonImage.classList.remove('fade-in');
 
+                // Play Pokémon cry (but not in silhouette mode to keep mystery)
+                if (gameActive && gameMode !== 'silhouette') {
+                    playPokemonCry(currentPokemon.id);
+                }
+
                 // Only enable input if game is still active
                 if (gameActive) {
                     inputSection.classList.remove('disabled');
@@ -1872,6 +1881,8 @@
             if (gameMode === 'silhouette') {
                 pokemonImage.classList.remove('silhouette');
                 pokemonImage.classList.add('reveal');
+                // Play cry when revealing in silhouette mode
+                playPokemonCry(currentPokemon.id);
             }
 
             // In silhouette mode, give more time to see the revealed Pokémon
@@ -1926,6 +1937,8 @@
             if (gameMode === 'silhouette') {
                 pokemonImage.classList.remove('silhouette');
                 pokemonImage.classList.add('reveal');
+                // Play cry when revealing in silhouette mode
+                playPokemonCry(currentPokemon.id);
             }
 
             incorrectCount++;
@@ -2061,25 +2074,28 @@
             const regions = selectedGenerations.length === 9 ? 'All Regions' :
                            selectedGenerations.map(g => regionNames[g - 1]).join(', ');
 
-            // Format score based on game mode
-            let scoreText;
+            // Format message based on game mode
+            let htmlMessage;
             if (gameMode === 'streak') {
-                scoreText = `Streak: ${finalScore}`;
-            } else {
-                scoreText = `Score: ${finalScore} / ${totalAttempts} (${accuracy}%)`;
-            }
-
-            const message = `⚡ *Pokémon Flashcards* ⚡
-Mode: ${modeName}
-${scoreText}
-Regions: ${regions}
+                htmlMessage = `⚡ <strong>Pokémon Flashcards</strong> ⚡
+<strong>Mode:</strong> ${modeName}
+<strong>Streak:</strong> ${finalScore}
+<strong>Regions:</strong> ${regions}
 
 Can you beat my score? 🎮`;
+            } else {
+                htmlMessage = `⚡ <strong>Pokémon Flashcards</strong> ⚡
+<strong>Mode:</strong> ${modeName}
+<strong>Score:</strong> ${finalScore} / ${totalAttempts} (${accuracy}%)
+<strong>Regions:</strong> ${regions}
+
+Can you beat my score? 🎮`;
+            }
 
             // Show preview modal with the message
             const sharePreviewOverlay = document.getElementById('share-preview-overlay');
             const sharePreviewText = document.getElementById('share-preview-text');
-            sharePreviewText.textContent = message;
+            sharePreviewText.innerHTML = htmlMessage;
             sharePreviewOverlay.classList.remove('hidden');
         }
 
@@ -2097,11 +2113,21 @@ Can you beat my score? 🎮`;
         const shareCloseButton = document.getElementById('share-close-button');
         const sharePreviewOverlay = document.getElementById('share-preview-overlay');
 
-        shareCopyButton.addEventListener('click', () => {
+        shareCopyButton.addEventListener('click', async () => {
             const sharePreviewText = document.getElementById('share-preview-text');
-            const message = sharePreviewText.textContent;
 
-            navigator.clipboard.writeText(message).then(() => {
+            try {
+                // Create a ClipboardItem with both HTML and plain text
+                const htmlBlob = new Blob([sharePreviewText.innerHTML], { type: 'text/html' });
+                const textBlob = new Blob([sharePreviewText.innerText], { type: 'text/plain' });
+
+                const clipboardItem = new ClipboardItem({
+                    'text/html': htmlBlob,
+                    'text/plain': textBlob
+                });
+
+                await navigator.clipboard.write([clipboardItem]);
+
                 const originalText = shareCopyButton.textContent;
                 shareCopyButton.textContent = '✓ Copied!';
                 shareCopyButton.classList.add('copied');
@@ -2109,9 +2135,21 @@ Can you beat my score? 🎮`;
                     shareCopyButton.textContent = originalText;
                     shareCopyButton.classList.remove('copied');
                 }, 2000);
-            }).catch(err => {
-                alert('Failed to copy to clipboard. Please try again.');
-            });
+            } catch (err) {
+                // Fallback to plain text if rich text copy fails
+                try {
+                    await navigator.clipboard.writeText(sharePreviewText.innerText);
+                    const originalText = shareCopyButton.textContent;
+                    shareCopyButton.textContent = '✓ Copied!';
+                    shareCopyButton.classList.add('copied');
+                    setTimeout(() => {
+                        shareCopyButton.textContent = originalText;
+                        shareCopyButton.classList.remove('copied');
+                    }, 2000);
+                } catch (fallbackErr) {
+                    alert('Failed to copy to clipboard. Please try again.');
+                }
+            }
         });
 
         shareCloseButton.addEventListener('click', () => {
@@ -2136,6 +2174,7 @@ Can you beat my score? 🎮`;
         const menuMusic = document.getElementById('menu-music');
         const battleMusic = document.getElementById('battle-music');
         const victoryMusic = document.getElementById('victory-music');
+        const pokemonCry = document.getElementById('pokemon-cry');
 
         // Load music preference from localStorage
         let musicPlaying = localStorage.getItem('musicEnabled') === 'true';
@@ -2144,9 +2183,27 @@ Can you beat my score? 🎮`;
         menuMusic.volume = 0.5;
         battleMusic.volume = 0.5;
         victoryMusic.volume = 0.5;
+        pokemonCry.volume = 0.7;
 
         // Set initial button state based on saved preference
         musicToggle.textContent = musicPlaying ? '🔊' : '🔇';
+
+        function playPokemonCry(pokemonId) {
+            if (!musicPlaying) return;
+
+            // Reset the audio element
+            pokemonCry.pause();
+            pokemonCry.currentTime = 0;
+
+            // Set the source with proper MIME type
+            pokemonCry.innerHTML = `<source src="https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemonId}.ogg" type="audio/ogg">`;
+            pokemonCry.load();
+
+            // Try to play, silently fail if format not supported
+            pokemonCry.play().catch(e => {
+                console.log('Cry play failed (possibly unsupported format on this browser):', e);
+            });
+        }
 
         function switchMusic(newMusic) {
             if (!musicPlaying) return;
