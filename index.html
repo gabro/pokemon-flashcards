@@ -1314,8 +1314,8 @@
                 <div class="round-counter" id="round-counter">Round 1 / 20</div>
 
             <div class="score">
-                <div class="score-item">
-                    <div class="score-label">Correct</div>
+                <div class="score-item" id="correct-score-item">
+                    <div class="score-label" id="correct-score-label">Correct</div>
                     <div class="score-value correct" id="correct-score">0</div>
                 </div>
                 <div class="score-item" id="incorrect-score-item">
@@ -1441,6 +1441,8 @@
         const feedback = document.getElementById('feedback');
         const loading = document.getElementById('loading');
         const correctScore = document.getElementById('correct-score');
+        const correctScoreLabel = document.getElementById('correct-score-label');
+        const correctScoreItem = document.getElementById('correct-score-item');
         const incorrectScore = document.getElementById('incorrect-score');
         const incorrectScoreItem = document.getElementById('incorrect-score-item');
         const generationDisplay = document.getElementById('generation-display');
@@ -1527,15 +1529,21 @@
             if (gameMode === 'classic') {
                 gameModeTitle.textContent = 'Classic Mode';
                 gameModeIcon.className = 'mode-icon icon-classic';
+                correctScoreLabel.textContent = 'Correct';
+                correctScoreItem.style.display = 'flex';
                 incorrectScoreItem.style.display = 'flex';
             } else if (gameMode === 'streak') {
                 gameModeTitle.textContent = 'Longest Streak';
                 gameModeIcon.className = 'mode-icon icon-streak';
+                correctScoreLabel.textContent = 'Streak';
+                correctScoreItem.style.display = 'flex';
                 incorrectScoreItem.style.display = 'none';
             } else if (gameMode === 'silhouette') {
                 gameModeTitle.textContent = "Who's That Pokémon?";
                 gameModeIcon.className = 'mode-icon icon-silhouette';
                 gameModeIcon.innerHTML = '<div class="question-mark">?</div>';
+                correctScoreLabel.textContent = 'Correct';
+                correctScoreItem.style.display = 'flex';
                 incorrectScoreItem.style.display = 'flex';
             }
 
@@ -2053,24 +2061,26 @@
             const regions = selectedGenerations.length === 9 ? 'All Regions' :
                            selectedGenerations.map(g => regionNames[g - 1]).join(', ');
 
+            // Format score based on game mode
+            let scoreText;
+            if (gameMode === 'streak') {
+                scoreText = `Streak: ${finalScore}`;
+            } else {
+                scoreText = `Score: ${finalScore} / ${totalAttempts} (${accuracy}%)`;
+            }
+
             const message = `⚡ *Pokémon Flashcards* ⚡
 Mode: ${modeName}
-Score: ${finalScore} / ${totalAttempts} (${accuracy}%)
+${scoreText}
 Regions: ${regions}
 
 Can you beat my score? 🎮`;
 
-            navigator.clipboard.writeText(message).then(() => {
-                const originalText = shareButton.textContent;
-                shareButton.textContent = '✓ Copied!';
-                shareButton.style.background = '#218838';
-                setTimeout(() => {
-                    shareButton.textContent = originalText;
-                    shareButton.style.background = '#28a745';
-                }, 2000);
-            }).catch(err => {
-                alert('Failed to copy to clipboard. Please try again.');
-            });
+            // Show preview modal with the message
+            const sharePreviewOverlay = document.getElementById('share-preview-overlay');
+            const sharePreviewText = document.getElementById('share-preview-text');
+            sharePreviewText.textContent = message;
+            sharePreviewOverlay.classList.remove('hidden');
         }
 
         // Event listeners
@@ -2081,6 +2091,39 @@ Can you beat my score? 🎮`;
         shareButton.addEventListener('click', shareResults);
         checkBtn.addEventListener('click', checkAnswer);
         skipBtn.addEventListener('click', skipPokemon);
+
+        // Share preview modal listeners
+        const shareCopyButton = document.getElementById('share-copy-button');
+        const shareCloseButton = document.getElementById('share-close-button');
+        const sharePreviewOverlay = document.getElementById('share-preview-overlay');
+
+        shareCopyButton.addEventListener('click', () => {
+            const sharePreviewText = document.getElementById('share-preview-text');
+            const message = sharePreviewText.textContent;
+
+            navigator.clipboard.writeText(message).then(() => {
+                const originalText = shareCopyButton.textContent;
+                shareCopyButton.textContent = '✓ Copied!';
+                shareCopyButton.classList.add('copied');
+                setTimeout(() => {
+                    shareCopyButton.textContent = originalText;
+                    shareCopyButton.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                alert('Failed to copy to clipboard. Please try again.');
+            });
+        });
+
+        shareCloseButton.addEventListener('click', () => {
+            sharePreviewOverlay.classList.add('hidden');
+        });
+
+        // Close modal when clicking outside the box
+        sharePreviewOverlay.addEventListener('click', (e) => {
+            if (e.target === sharePreviewOverlay) {
+                sharePreviewOverlay.classList.add('hidden');
+            }
+        });
 
         answerInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && gameActive && !showingFeedback) {
