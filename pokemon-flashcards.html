@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Flashcard Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Pokeball decorations */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            opacity: 0.05;
+            z-index: 0;
+        }
+
+        body::before {
+            top: -200px;
+            left: -200px;
+            background:
+                radial-gradient(circle at 50% 50%, #CC0000 0%, #CC0000 45%, transparent 45%, transparent 55%, #000 55%, #000 58%, transparent 58%),
+                radial-gradient(circle at 50% 50%, #CC0000 0%, #CC0000 45%, #000 45%, #000 55%, #fff 55%);
+        }
+
+        body::after {
+            bottom: -200px;
+            right: -200px;
+            background:
+                radial-gradient(circle at 50% 50%, #CC0000 0%, #CC0000 45%, transparent 45%, transparent 55%, #000 55%, #000 58%, transparent 58%),
+                radial-gradient(circle at 50% 50%, #CC0000 0%, #CC0000 45%, #000 45%, #000 55%, #fff 55%);
+        }
+
+        .game-header {
+            background: #CC0000;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .game-header.compact {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            box-shadow: none;
+        }
+
+        .game-header h1 {
+            color: #FFCB05;
+            font-size: 3em;
+            margin: 0;
+            text-shadow:
+                4px 4px 0 #2a75bb,
+                -2px -2px 0 #2a75bb,
+                2px -2px 0 #2a75bb,
+                -2px 2px 0 #2a75bb,
+                2px 2px 0 #2a75bb;
+            letter-spacing: 3px;
+        }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-content {
+            background: #FFFFFF;
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 750px;
+            width: 100%;
+            text-align: center;
+            border: 6px solid #CC0000;
+            position: relative;
+        }
+
+        /* Pokeball icon decoration for game content */
+        .game-content::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background:
+                linear-gradient(180deg, #CC0000 0%, #CC0000 48%, #000 48%, #000 52%, #fff 52%, #fff 100%);
+            border: 4px solid #000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .game-content::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow:
+                inset 0 2px 4px rgba(0, 0, 0, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 11;
+        }
+
+        .score {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 20px;
+            background: #3B4CCA;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(59, 76, 202, 0.3);
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .score-label {
+            font-size: 0.85em;
+            color: #ffffff;
+            margin-bottom: 5px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .score-value {
+            font-size: 1.8em;
+            font-weight: 800;
+        }
+
+        .correct {
+            color: #78c850;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .incorrect {
+            color: #ff6b6b;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .total {
+            color: #ffcb05;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .pokemon-display {
+            margin: 30px 0;
+        }
+
+        .pokemon-image {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            background: radial-gradient(circle, #ffffff 0%, #e8e8e8 100%);
+            border-radius: 20px;
+            padding: 20px;
+            border: 5px solid #ffcb05;
+            box-shadow:
+                0 8px 20px rgba(0, 0, 0, 0.2),
+                inset 0 -2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .pokemon-image.silhouette {
+            filter: brightness(0) contrast(200%);
+            background: transparent !important;
+        }
+
+        .pokemon-image.reveal {
+            filter: none;
+            transition: filter 0.8s ease;
+        }
+
+        .pokemon-image::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            background: #3B4CCA;
+            border-radius: 22px;
+            z-index: -1;
+        }
+
+        .pokemon-image.fade-out {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .pokemon-image.fade-in {
+            animation: fadeInScale 0.2s ease forwards;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .pokemon-number {
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9em;
+            transition: opacity 0.15s ease;
+        }
+
+        .pokemon-number.fade-out {
+            opacity: 0;
+        }
+
+        .input-section {
+            margin: 20px 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .input-section.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .check-btn {
+            background: #CC0000;
+            color: white;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 15px rgba(238, 21, 21, 0.4);
+        }
+
+        .check-btn:hover {
+            background: #AA0000;
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(238, 21, 21, 0.5);
+        }
+
+        .skip-btn {
+            background: #3B4CCA;
+            color: white;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 15px rgba(59, 76, 202, 0.4);
+        }
+
+        .skip-btn:hover {
+            background: #2A3BA8;
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(59, 76, 202, 0.5);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading {
+            color: #666;
+            font-size: 1.2em;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .fullscreen-overlay.show {
+            opacity: 1;
+        }
+
+        .fullscreen-overlay.correct {
+            background: #4CAF50;
+        }
+
+        .fullscreen-overlay.incorrect {
+            background: #CC0000;
+        }
+
+        .fullscreen-overlay.skip {
+            background: #3B4CCA;
+        }
+
+        .result-emoji {
+            font-size: 120px;
+            margin-bottom: 20px;
+            animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .result-text {
+            font-size: 3em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .result-pokemon-name {
+            font-size: 2.5em;
+            color: white;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .result-user-answer {
+            font-size: 1.5em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 10px;
+            font-style: italic;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: white;
+            position: absolute;
+            animation: confettiFall 1.5s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Start Menu Styles */
+        .menu-screen {
+            text-align: center;
+        }
+
+        .menu-title {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .game-screen-title {
+            font-size: 1.8em;
+            color: #CC0000;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+
+        .start-button {
+            background: #CC0000;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 20px 60px;
+            border: 4px solid #FFCB05;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow:
+                0 8px 20px rgba(238, 21, 21, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.2s ease;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow:
+                0 12px 30px rgba(238, 21, 21, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            background: #AA0000;
+        }
+
+        .start-button:active {
+            transform: translateY(0);
+        }
+
+        .game-info {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 20px;
+        }
+
+        .mode-selector {
+            margin: 25px 0;
+        }
+
+        .mode-selector-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .mode-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .mode-option {
+            display: grid;
+            grid-row: span 4;
+            grid-template-rows: subgrid;
+            align-items: center;
+            justify-items: center;
+            padding: 20px;
+            background: #fff;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .mode-option:hover {
+            border-color: #CC0000;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(204, 0, 0, 0.2);
+        }
+
+        .mode-option.selected {
+            background: #CC0000;
+            border-color: #CC0000;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(204, 0, 0, 0.3);
+        }
+
+        .mode-option-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .mode-option-description {
+            font-size: 0.85em;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        .mode-option-highscore {
+            font-size: 0.75em;
+            margin-top: 8px;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        .mode-option-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px auto;
+            position: relative;
+        }
+
+        /* Classic Mode Icon - Pokédex with 20 */
+        .icon-classic {
+            background: linear-gradient(135deg, #CC0000 0%, #AA0000 100%);
+            border-radius: 10px;
+            border: 3px solid #3B4CCA;
+            box-shadow:
+                0 4px 12px rgba(204, 0, 0, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-classic::before {
+            content: '20';
+            font-size: 28px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon-classic::after {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 14px;
+            height: 14px;
+            background: #FFCB05;
+            border-radius: 50%;
+            border: 2px solid #3B4CCA;
+        }
+
+        /* Streak Mode Icon - Infinity symbol */
+        .icon-streak {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fff9e6 0%, #ffe8cc 100%);
+            border-radius: 50%;
+            border: 3px solid #FF6B00;
+            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+        }
+
+        .icon-streak::before {
+            content: '∞';
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FF6B00 0%, #FFD700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        /* Silhouette Mode Icon - Pikachu silhouette with question mark */
+        .icon-silhouette {
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
+            border: 3px solid #3B4CCA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: visible;
+        }
+
+        /* Pikachu sprite as silhouette */
+        .icon-silhouette::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: brightness(0) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+            z-index: 1;
+        }
+
+        .icon-silhouette .question-mark {
+            font-size: 32px;
+            font-weight: 900;
+            color: #FFCB05;
+            text-shadow:
+                0 0 10px rgba(255, 203, 5, 0.5),
+                2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            position: relative;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 1; }
+        }
+
+        .generation-selector {
+            margin: 25px 0;
+        }
+
+        .generation-selector-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: color 0.2s ease, margin-bottom 0.3s ease;
+        }
+
+        .generation-selector-title.collapsed {
+            margin-bottom: 0;
+        }
+
+        .generation-selector-title:hover {
+            color: #3B4CCA;
+        }
+
+        .generation-selector-title::before {
+            content: '▼';
+            font-size: 0.8em;
+            transition: transform 0.3s ease;
+        }
+
+        .generation-selector-title.collapsed::before {
+            transform: rotate(-90deg);
+        }
+
+        .generation-selector-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 500px;
+            opacity: 1;
+        }
+
+        .generation-selector-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .generation-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .generation-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .generation-option:hover {
+            border-color: #3B4CCA;
+            transform: translateY(-2px);
+        }
+
+        .generation-option.selected {
+            background: #3B4CCA;
+            border-color: #3B4CCA;
+            color: white;
+            font-weight: bold;
+        }
+
+        .generation-option input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .select-all-btn {
+            background: #FFCB05;
+            color: #333;
+            font-size: 0.9em;
+            font-weight: bold;
+            padding: 8px 16px;
+            border: 2px solid #3B4CCA;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .select-all-btn:hover {
+            background: #FFD700;
+            transform: translateY(-2px);
+        }
+
+        /* Game Over Styles */
+        .game-over-screen {
+            text-align: center;
+        }
+
+        .game-over-title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .final-score-display {
+            background: #3B4CCA;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .final-score-label {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .final-score-value {
+            font-size: 4em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .new-high-score {
+            background: #ffc107;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-top: 15px;
+            display: inline-block;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .play-again-button {
+            background: #3B4CCA;
+            color: white;
+            font-size: 1.3em;
+            font-weight: bold;
+            padding: 15px 40px;
+            border: 3px solid #FFCB05;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .play-again-button:hover {
+            transform: translateY(-3px);
+            background: #2A3BA8;
+        }
+
+        .round-counter {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .quit-button {
+            background: #9e9e9e;
+            color: white;
+            font-size: 0.9em;
+            font-weight: bold;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+
+        .quit-button:hover {
+            background: #757575;
+        }
+
+        .menu-button {
+            background: #666666;
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 12px 30px;
+            border: 2px solid #333333;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+            margin-top: 15px;
+        }
+
+        .menu-button:hover {
+            transform: translateY(-2px);
+            background: #555555;
+        }
+
+        .toggle-button {
+            position: fixed;
+            background: #FFCB05;
+            border: 3px solid #3B4CCA;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 203, 5, 0.4);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .toggle-button:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 6px 20px rgba(255, 203, 5, 0.6);
+            background: #FFD700;
+        }
+
+        .toggle-button:active {
+            transform: scale(0.95);
+        }
+
+        .music-toggle {
+            top: 20px;
+            right: 20px;
+        }
+
+        .generation-display {
+            background: rgba(59, 76, 202, 0.15);
+            border: 2px solid #3B4CCA;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-weight: 600;
+            color: #3B4CCA;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .generation-display.hidden {
+            display: none;
+        }
+
+        .sprite-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 203, 5, 0.9);
+            border: 2px solid #3B4CCA;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .sprite-toggle:hover {
+            background: #FFD700;
+            transform: scale(1.1);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .sprite-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .pokemon-display {
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-button music-toggle" id="music-toggle" title="Toggle Music">🔊</button>
+    <audio id="menu-music" loop>
+        <source src="https://jetta.vgmtreasurechest.com/soundtracks/pokemon-game-boy-pok-mon-sound-complete-set-play-cd/sgalcfte/1-01.%20Opening.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="battle-music" loop>
+        <source src="https://jetta.vgmtreasurechest.com/soundtracks/pokemon-game-boy-pok-mon-sound-complete-set-play-cd/dariqfbs/1-15.%20Battle%20%28VS%20Trainer%29.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="victory-music">
+        <source src="https://jetta.vgmtreasurechest.com/soundtracks/pokemon-game-boy-pok-mon-sound-complete-set-play-cd/jtoodasn/1-16.%20Victory%20%28VS%20Trainer%29.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Game Header -->
+    <div class="game-header">
+        <h1>⚡ POKÉMON FLASHCARDS ⚡</h1>
+    </div>
+
+    <div class="game-container">
+        <div class="game-content">
+            <!-- Start Menu -->
+            <div id="menu-screen" class="menu-screen">
+                <h2 class="menu-title">Welcome, Trainer!</h2>
+
+            <div class="mode-selector">
+                <div class="mode-selector-title">Select Game Mode</div>
+                <div class="mode-options">
+                    <div class="mode-option selected" data-mode="classic">
+                        <div class="mode-option-icon icon-classic"></div>
+                        <div class="mode-option-title">Classic</div>
+                        <div class="mode-option-description">Answer 20 Pokémon correctly</div>
+                        <div class="mode-option-highscore" id="highscore-classic">🏆 Best: 0</div>
+                    </div>
+                    <div class="mode-option" data-mode="streak">
+                        <div class="mode-option-icon icon-streak"></div>
+                        <div class="mode-option-title">Longest Streak</div>
+                        <div class="mode-option-description">Keep going until you fail!</div>
+                        <div class="mode-option-highscore" id="highscore-streak">🏆 Best: 0</div>
+                    </div>
+                    <div class="mode-option" data-mode="silhouette">
+                        <div class="mode-option-icon icon-silhouette">
+                            <div class="question-mark">?</div>
+                        </div>
+                        <div class="mode-option-title">Who's That Pokémon?</div>
+                        <div class="mode-option-description">Guess from the silhouette!</div>
+                        <div class="mode-option-highscore" id="highscore-silhouette">🏆 Best: 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="generation-selector">
+                <div class="generation-selector-title collapsed" id="generation-selector-title">Select Generations</div>
+                <div class="generation-selector-content collapsed" id="generation-selector-content">
+                    <div class="generation-options" id="generation-options">
+                        <div class="generation-option selected" data-gen="1">Kanto <span style="opacity: 0.6; font-size: 0.85em;">Gen I</span></div>
+                        <div class="generation-option selected" data-gen="2">Johto <span style="opacity: 0.6; font-size: 0.85em;">Gen II</span></div>
+                        <div class="generation-option selected" data-gen="3">Hoenn <span style="opacity: 0.6; font-size: 0.85em;">Gen III</span></div>
+                        <div class="generation-option selected" data-gen="4">Sinnoh <span style="opacity: 0.6; font-size: 0.85em;">Gen IV</span></div>
+                        <div class="generation-option selected" data-gen="5">Unova <span style="opacity: 0.6; font-size: 0.85em;">Gen V</span></div>
+                        <div class="generation-option selected" data-gen="6">Kalos <span style="opacity: 0.6; font-size: 0.85em;">Gen VI</span></div>
+                        <div class="generation-option selected" data-gen="7">Alola <span style="opacity: 0.6; font-size: 0.85em;">Gen VII</span></div>
+                        <div class="generation-option selected" data-gen="8">Galar <span style="opacity: 0.6; font-size: 0.85em;">Gen VIII</span></div>
+                        <div class="generation-option selected" data-gen="9">Paldea <span style="opacity: 0.6; font-size: 0.85em;">Gen IX</span></div>
+                    </div>
+                    <button class="select-all-btn" id="select-all-btn">Deselect All</button>
+                </div>
+            </div>
+
+            <button class="start-button" id="start-button">Start Game</button>
+
+            <div class="game-info" id="game-info">
+                Answer 20 Pokémon correctly!
+            </div>
+        </div>
+
+            <!-- Game Screen -->
+            <div id="game-screen" class="hidden">
+                <h2 class="game-screen-title">Guess the Pokémon!</h2>
+
+                <div class="generation-display hidden" id="generation-display">Gens: I-IX</div>
+
+                <div class="round-counter" id="round-counter">Round 1 / 20</div>
+
+            <div class="score">
+                <div class="score-item">
+                    <div class="score-label">Correct</div>
+                    <div class="score-value correct" id="correct-score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Incorrect</div>
+                    <div class="score-value incorrect" id="incorrect-score">0</div>
+                </div>
+            </div>
+
+            <div class="pokemon-display">
+                <button class="sprite-toggle" id="sprite-toggle" title="Toggle Animation">🎬</button>
+                <div class="loading" id="loading">Loading Pokémon...</div>
+                <img id="pokemon-image" class="pokemon-image" src="" alt="Pokémon">
+                <div class="pokemon-number" id="pokemon-number"></div>
+            </div>
+
+            <div class="input-section">
+                <input type="text" id="answer-input" placeholder="Who's that Pokémon?" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <div class="buttons">
+                    <button class="check-btn" id="check-btn">Check Answer</button>
+                    <button class="skip-btn" id="skip-btn">Skip</button>
+                </div>
+            </div>
+
+            <div class="feedback hidden" id="feedback"></div>
+
+            <button class="quit-button" id="quit-button">Quit to Menu</button>
+        </div>
+
+            <!-- Game Over Screen -->
+            <div id="game-over-screen" class="game-over-screen hidden">
+                <h2 class="game-over-title">Game Over!</h2>
+
+            <div class="final-score-display">
+                <div class="final-score-label">Your Score</div>
+                <div class="final-score-value" id="final-score">0</div>
+                <div id="new-high-score-badge" class="new-high-score hidden">🎉 New High Score! 🎉</div>
+            </div>
+
+            <button class="play-again-button" id="play-again-button">Play Again</button>
+            <button class="menu-button" id="menu-button">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fullscreen-overlay" id="fullscreen-overlay">
+        <div class="result-emoji" id="result-emoji"></div>
+        <div class="result-text" id="result-text"></div>
+        <div class="result-pokemon-name" id="result-pokemon-name"></div>
+        <div class="result-user-answer" id="result-user-answer"></div>
+    </div>
+
+    <script>
+        const MAX_POKEMON = 1025;
+        const ROUNDS_PER_GAME = 20;
+
+        // Generation ranges
+        const GENERATION_RANGES = {
+            1: { min: 1, max: 151 },
+            2: { min: 152, max: 251 },
+            3: { min: 252, max: 386 },
+            4: { min: 387, max: 493 },
+            5: { min: 494, max: 649 },
+            6: { min: 650, max: 721 },
+            7: { min: 722, max: 809 },
+            8: { min: 810, max: 905 },
+            9: { min: 906, max: 1025 }
+        };
+
+        let currentPokemon = null;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let currentRound = 0;
+        let gameActive = false;
+        let showingFeedback = false;
+        let selectedGenerations = [1, 2, 3, 4, 5, 6, 7, 8, 9]; // All generations by default
+        let useAnimatedSprites = true; // Animation enabled by default
+        let gameMode = 'classic'; // 'classic' or 'streak'
+
+        // DOM elements
+        const menuScreen = document.getElementById('menu-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameHeader = document.querySelector('.game-header');
+        const startButton = document.getElementById('start-button');
+        const playAgainButton = document.getElementById('play-again-button');
+        const menuButton = document.getElementById('menu-button');
+        const quitButton = document.getElementById('quit-button');
+        const highScoreClassic = document.getElementById('highscore-classic');
+        const highScoreStreak = document.getElementById('highscore-streak');
+        const highScoreSilhouette = document.getElementById('highscore-silhouette');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const newHighScoreBadge = document.getElementById('new-high-score-badge');
+        const roundCounter = document.getElementById('round-counter');
+        const pokemonImage = document.getElementById('pokemon-image');
+        const pokemonNumber = document.getElementById('pokemon-number');
+        const answerInput = document.getElementById('answer-input');
+        const checkBtn = document.getElementById('check-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        const feedback = document.getElementById('feedback');
+        const loading = document.getElementById('loading');
+        const correctScore = document.getElementById('correct-score');
+        const incorrectScore = document.getElementById('incorrect-score');
+        const generationDisplay = document.getElementById('generation-display');
+        const spriteToggle = document.getElementById('sprite-toggle');
+
+        // Levenshtein distance for fuzzy matching
+        function levenshteinDistance(str1, str2) {
+            const len1 = str1.length;
+            const len2 = str2.length;
+            const matrix = [];
+
+            for (let i = 0; i <= len1; i++) {
+                matrix[i] = [i];
+            }
+
+            for (let j = 0; j <= len2; j++) {
+                matrix[0][j] = j;
+            }
+
+            for (let i = 1; i <= len1; i++) {
+                for (let j = 1; j <= len2; j++) {
+                    const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j] + 1,
+                        matrix[i][j - 1] + 1,
+                        matrix[i - 1][j - 1] + cost
+                    );
+                }
+            }
+
+            return matrix[len1][len2];
+        }
+
+        function isCloseEnough(userAnswer, correctAnswer) {
+            const maxDistance = Math.max(1, Math.floor(correctAnswer.length / 4));
+            const distance = levenshteinDistance(userAnswer, correctAnswer);
+            return distance <= maxDistance;
+        }
+
+        // LocalStorage functions
+        function getHighScore(mode = gameMode) {
+            return parseInt(localStorage.getItem(`pokemonHighScore_${mode}`) || '0');
+        }
+
+        function setHighScore(score, mode = gameMode) {
+            localStorage.setItem(`pokemonHighScore_${mode}`, score.toString());
+        }
+
+        function updateHighScoreDisplay() {
+            // Update all high scores in their respective mode buttons
+            highScoreClassic.textContent = `🏆 Best: ${getHighScore('classic')}`;
+            highScoreStreak.textContent = `🏆 Best: ${getHighScore('streak')}`;
+            highScoreSilhouette.textContent = `🏆 Best: ${getHighScore('silhouette')}`;
+        }
+
+        // Helper function to format generation display
+        function updateGenerationDisplay() {
+            const regionNames = ['Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Unova', 'Kalos', 'Alola', 'Galar', 'Paldea'];
+            if (selectedGenerations.length === 9) {
+                generationDisplay.textContent = 'All Regions';
+            } else {
+                const regionLabels = selectedGenerations.map(g => regionNames[g - 1]);
+                generationDisplay.textContent = regionLabels.join(', ');
+            }
+        }
+
+        // Game state functions
+        function startGame() {
+            correctCount = 0;
+            incorrectCount = 0;
+            currentRound = 0;
+            gameActive = true;
+
+            correctScore.textContent = '0';
+            incorrectScore.textContent = '0';
+
+            menuScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            // Show generation display
+            updateGenerationDisplay();
+            generationDisplay.classList.remove('hidden');
+
+            // In silhouette mode, default to static sprites (better for silhouettes)
+            if (gameMode === 'silhouette') {
+                useAnimatedSprites = false;
+            }
+
+            // Update sprite toggle to show correct state
+            spriteToggle.textContent = useAnimatedSprites ? '🎬' : '🖼️';
+            spriteToggle.title = useAnimatedSprites ? 'Switch to Static' : 'Switch to Animated';
+
+            // Hide header during gameplay
+            gameHeader.classList.add('compact');
+
+            // Switch to battle music
+            switchMusic(battleMusic);
+
+            nextRound();
+        }
+
+        function nextRound() {
+            if ((gameMode === 'classic' || gameMode === 'silhouette') && currentRound >= ROUNDS_PER_GAME) {
+                endGame();
+                return;
+            }
+
+            currentRound++;
+
+            if (gameMode === 'classic' || gameMode === 'silhouette') {
+                roundCounter.textContent = `Round ${currentRound} / ${ROUNDS_PER_GAME}`;
+            } else {
+                roundCounter.textContent = `Streak: ${correctCount}`;
+            }
+
+            fetchRandomPokemon();
+        }
+
+        function endGame() {
+            gameActive = false;
+            const finalScore = correctCount;
+            const highScore = getHighScore();
+            const isNewHighScore = finalScore > highScore;
+
+            if (isNewHighScore) {
+                setHighScore(finalScore);
+                newHighScoreBadge.classList.remove('hidden');
+            } else {
+                newHighScoreBadge.classList.add('hidden');
+            }
+
+            finalScoreDisplay.textContent = finalScore;
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+
+            // Show header again
+            gameHeader.classList.remove('compact');
+
+            // Play victory music, then switch to menu music
+            switchMusic(victoryMusic);
+
+            // When victory music ends, switch to menu music
+            victoryMusic.onended = () => {
+                switchMusic(menuMusic);
+            };
+        }
+
+        function quitGame() {
+            if (gameActive && currentRound > 0) {
+                const confirmed = confirm('Are you sure you want to quit? Your progress will be lost.');
+                if (!confirmed) {
+                    return;
+                }
+            }
+            returnToMenu();
+        }
+
+        function returnToMenu() {
+            gameActive = false;
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            menuScreen.classList.remove('hidden');
+            updateHighScoreDisplay();
+
+            // Hide generation display
+            generationDisplay.classList.add('hidden');
+
+            // Show header again
+            gameHeader.classList.remove('compact');
+
+            // Switch back to menu music (if coming from quit)
+            if (currentMusic !== menuMusic) {
+                switchMusic(menuMusic);
+            }
+        }
+
+        async function fetchRandomPokemon() {
+            if (!gameActive) return; // Don't fetch if game is not active
+
+            try {
+                // Fade out current Pokémon and disable input
+                pokemonImage.classList.add('fade-out');
+                pokemonNumber.classList.add('fade-out');
+                const inputSection = document.querySelector('.input-section');
+                inputSection.classList.add('disabled');
+
+                // Immediately remove silhouette/reveal classes to prevent transition flash
+                pokemonImage.classList.remove('silhouette', 'reveal');
+                pokemonImage.style.background = '';
+
+                // Wait for fade out (slower in silhouette mode for dramatic effect)
+                const fadeOutDuration = gameMode === 'silhouette' ? 400 : 150;
+                await new Promise(resolve => setTimeout(resolve, fadeOutDuration));
+
+                // Check again if game is still active
+                if (!gameActive) return;
+
+                loading.classList.remove('hidden');
+                answerInput.value = '';
+                answerInput.disabled = true;
+                checkBtn.disabled = true;
+                skipBtn.disabled = true;
+
+                // Get random Pokemon from selected generations
+                const randomId = getRandomPokemonFromGenerations();
+                const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
+                const data = await response.json();
+
+                // Check again if game is still active before updating UI
+                if (!gameActive) return;
+
+                // Some Pokemon have forms (e.g., "tatsugiri-curly"), extract base name
+                const baseName = data.species.name;
+
+                // Choose sprite based on animation preference
+                let sprite;
+
+                if (useAnimatedSprites) {
+                    // Prefer animated showdown sprite, fallback to official artwork, then default sprite
+                    sprite = data.sprites.other?.showdown?.front_default ||
+                            data.sprites.other['official-artwork'].front_default ||
+                            data.sprites.front_default;
+                } else {
+                    // Use static official artwork or default sprite
+                    sprite = data.sprites.other['official-artwork'].front_default ||
+                            data.sprites.front_default;
+                }
+
+                currentPokemon = {
+                    name: baseName,
+                    id: data.id,
+                    sprite: sprite,
+                    animatedSprite: data.sprites.other?.showdown?.front_default,
+                    staticSprite: data.sprites.other['official-artwork'].front_default || data.sprites.front_default
+                };
+
+                pokemonImage.src = currentPokemon.sprite;
+                pokemonNumber.textContent = `#${String(currentPokemon.id).padStart(4, '0')}`;
+
+                // Apply silhouette effect if in silhouette mode
+                if (gameMode === 'silhouette') {
+                    pokemonImage.classList.add('silhouette');
+                    pokemonImage.classList.remove('reveal');
+                    pokemonImage.style.background = 'transparent';
+                } else {
+                    pokemonImage.classList.remove('silhouette', 'reveal');
+                    pokemonImage.style.background = '';
+                }
+
+                // Enable/disable sprite toggle based on animated sprite availability
+                if (currentPokemon.animatedSprite) {
+                    spriteToggle.disabled = false;
+                    spriteToggle.style.opacity = '1';
+                    spriteToggle.style.cursor = 'pointer';
+                    spriteToggle.title = useAnimatedSprites ? 'Switch to Static' : 'Switch to Animated';
+                } else {
+                    spriteToggle.disabled = true;
+                    spriteToggle.style.opacity = '0.5';
+                    spriteToggle.style.cursor = 'not-allowed';
+                    // Force to static sprite if no animated sprite available
+                    useAnimatedSprites = false;
+                    spriteToggle.textContent = '🖼️';
+                    spriteToggle.title = 'No animation available';
+                }
+
+                loading.classList.add('hidden');
+
+                // Fade in new Pokémon (slower in silhouette mode)
+                pokemonImage.classList.remove('fade-out');
+                pokemonImage.classList.add('fade-in');
+                pokemonNumber.classList.remove('fade-out');
+
+                // Wait for fade in to complete (slower in silhouette mode for dramatic effect)
+                const fadeInDuration = gameMode === 'silhouette' ? 500 : 200;
+                await new Promise(resolve => setTimeout(resolve, fadeInDuration));
+
+                pokemonImage.classList.remove('fade-in');
+
+                // Only enable input if game is still active
+                if (gameActive) {
+                    inputSection.classList.remove('disabled');
+                    answerInput.disabled = false;
+                    checkBtn.disabled = false;
+                    skipBtn.disabled = false;
+                    answerInput.focus();
+                }
+            } catch (error) {
+                console.error('Error fetching Pokémon:', error);
+                loading.textContent = 'Error loading Pokémon. Please refresh the page.';
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#ffeb3b', '#ff9800', '#f44336', '#e91e63', '#9c27b0', '#3f51b5', '#03a9f4', '#00bcd4', '#4caf50'];
+            const overlay = document.getElementById('fullscreen-overlay');
+
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-10px';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.3 + 's';
+                    confetti.style.animationDuration = (Math.random() * 0.5 + 1) + 's';
+                    overlay.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 2000);
+                }, i * 20);
+            }
+        }
+
+        function showFullscreenFeedback(type, pokemonName, wasTypo = false, userAnswer = '') {
+            const overlay = document.getElementById('fullscreen-overlay');
+            const emoji = document.getElementById('result-emoji');
+            const text = document.getElementById('result-text');
+            const pokeName = document.getElementById('result-pokemon-name');
+            const userAnswerDiv = document.getElementById('result-user-answer');
+
+            overlay.className = 'fullscreen-overlay ' + type;
+            userAnswerDiv.textContent = ''; // Clear previous
+
+            if (type === 'correct') {
+                emoji.textContent = '🎉';
+                if (wasTypo) {
+                    text.textContent = 'CLOSE ENOUGH!';
+                    pokeName.textContent = capitalize(pokemonName);
+                    userAnswerDiv.textContent = `(You wrote: "${capitalize(userAnswer)}")`;
+                } else {
+                    text.textContent = 'CORRECT!';
+                    pokeName.textContent = capitalize(pokemonName);
+                }
+                createConfetti();
+            } else if (type === 'incorrect') {
+                emoji.textContent = '😅';
+                text.textContent = 'NOT QUITE!';
+                pokeName.textContent = capitalize(pokemonName);
+            } else if (type === 'skip') {
+                emoji.textContent = '💭';
+                text.textContent = 'IT WAS...';
+                pokeName.textContent = capitalize(pokemonName);
+            }
+
+            setTimeout(() => overlay.classList.add('show'), 10);
+
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                setTimeout(() => {
+                    overlay.className = 'fullscreen-overlay';
+                }, 200);
+            }, 1200);
+        }
+
+        function checkAnswer() {
+            const userAnswer = answerInput.value.trim().toLowerCase();
+            const correctAnswer = currentPokemon.name.toLowerCase();
+
+            if (!userAnswer || !gameActive || showingFeedback || !currentPokemon) {
+                return;
+            }
+
+            // Set feedback flag immediately to prevent double submission
+            showingFeedback = true;
+
+            // Disable buttons immediately
+            checkBtn.disabled = true;
+            skipBtn.disabled = true;
+
+            // Disable input during feedback
+            const inputSection = document.querySelector('.input-section');
+            inputSection.classList.add('disabled');
+
+            const isExactMatch = userAnswer === correctAnswer;
+            const isFuzzyMatch = !isExactMatch && isCloseEnough(userAnswer, correctAnswer);
+
+            // Reveal silhouette in silhouette mode
+            if (gameMode === 'silhouette') {
+                pokemonImage.classList.remove('silhouette');
+                pokemonImage.classList.add('reveal');
+            }
+
+            // In silhouette mode, give more time to see the revealed Pokémon
+            const feedbackDuration = gameMode === 'silhouette' ? 2500 : 1400;
+
+            if (isExactMatch || isFuzzyMatch) {
+                correctCount++;
+                correctScore.textContent = correctCount;
+                showFullscreenFeedback('correct', currentPokemon.name, isFuzzyMatch, userAnswer);
+
+                setTimeout(() => {
+                    showingFeedback = false;
+                    nextRound();
+                }, feedbackDuration);
+            } else {
+                incorrectCount++;
+                incorrectScore.textContent = incorrectCount;
+                showFullscreenFeedback('incorrect', currentPokemon.name);
+
+                // In streak mode, end game on first incorrect answer
+                if (gameMode === 'streak') {
+                    setTimeout(() => {
+                        showingFeedback = false;
+                        endGame();
+                    }, feedbackDuration);
+                } else {
+                    setTimeout(() => {
+                        showingFeedback = false;
+                        nextRound();
+                    }, feedbackDuration);
+                }
+            }
+        }
+
+        function skipPokemon() {
+            if (!gameActive || showingFeedback || !currentPokemon) return;
+
+            // Set feedback flag immediately to prevent double submission
+            showingFeedback = true;
+
+            // Disable buttons immediately
+            checkBtn.disabled = true;
+            skipBtn.disabled = true;
+
+            const inputSection = document.querySelector('.input-section');
+            inputSection.classList.add('disabled');
+
+            // Reveal silhouette in silhouette mode
+            if (gameMode === 'silhouette') {
+                pokemonImage.classList.remove('silhouette');
+                pokemonImage.classList.add('reveal');
+            }
+
+            incorrectCount++;
+            incorrectScore.textContent = incorrectCount;
+            showFullscreenFeedback('skip', currentPokemon.name);
+
+            // In silhouette mode, give more time to see the revealed Pokémon
+            const feedbackDuration = gameMode === 'silhouette' ? 2500 : 1400;
+
+            // In streak mode, end game on skip
+            if (gameMode === 'streak') {
+                setTimeout(() => {
+                    showingFeedback = false;
+                    endGame();
+                }, feedbackDuration);
+            } else {
+                setTimeout(() => {
+                    showingFeedback = false;
+                    nextRound();
+                }, feedbackDuration);
+            }
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function getRandomPokemonFromGenerations() {
+            // Build array of valid Pokemon IDs from selected generations
+            const validIds = [];
+            selectedGenerations.forEach(gen => {
+                const range = GENERATION_RANGES[gen];
+                for (let i = range.min; i <= range.max; i++) {
+                    validIds.push(i);
+                }
+            });
+
+            // Return random ID from valid IDs
+            return validIds[Math.floor(Math.random() * validIds.length)];
+        }
+
+        // Mode selector logic
+        const modeOptions = document.querySelectorAll('.mode-option');
+
+        modeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove selected class from all options
+                modeOptions.forEach(opt => opt.classList.remove('selected'));
+
+                // Add selected class to clicked option
+                option.classList.add('selected');
+
+                // Update game mode
+                gameMode = option.dataset.mode;
+
+                // Update high score display
+                updateHighScoreDisplay();
+            });
+        });
+
+        // Generation selector collapse logic
+        const generationSelectorTitle = document.getElementById('generation-selector-title');
+        const generationSelectorContent = document.getElementById('generation-selector-content');
+
+        generationSelectorTitle.addEventListener('click', () => {
+            generationSelectorTitle.classList.toggle('collapsed');
+            generationSelectorContent.classList.toggle('collapsed');
+        });
+
+        // Generation selector logic
+        const generationOptions = document.querySelectorAll('.generation-option');
+        const selectAllBtn = document.getElementById('select-all-btn');
+
+        generationOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const gen = parseInt(option.dataset.gen);
+
+                if (option.classList.contains('selected')) {
+                    option.classList.remove('selected');
+                    selectedGenerations = selectedGenerations.filter(g => g !== gen);
+                } else {
+                    option.classList.add('selected');
+                    selectedGenerations.push(gen);
+                    selectedGenerations.sort((a, b) => a - b);
+                }
+
+                // Ensure at least one generation is selected
+                if (selectedGenerations.length === 0) {
+                    option.classList.add('selected');
+                    selectedGenerations.push(gen);
+                }
+
+                // Update button text
+                updateSelectAllButton();
+            });
+        });
+
+        selectAllBtn.addEventListener('click', () => {
+            const allSelected = selectedGenerations.length === 9;
+
+            if (allSelected) {
+                // Deselect all
+                generationOptions.forEach(opt => opt.classList.remove('selected'));
+                selectedGenerations = [1]; // Keep at least Gen 1
+                generationOptions[0].classList.add('selected');
+            } else {
+                // Select all
+                generationOptions.forEach(opt => opt.classList.add('selected'));
+                selectedGenerations = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            }
+
+            updateSelectAllButton();
+        });
+
+        function updateSelectAllButton() {
+            const allSelected = selectedGenerations.length === 9;
+            selectAllBtn.textContent = allSelected ? 'Deselect All' : 'Select All';
+        }
+
+        // Event listeners
+        startButton.addEventListener('click', startGame);
+        playAgainButton.addEventListener('click', startGame);
+        menuButton.addEventListener('click', returnToMenu);
+        quitButton.addEventListener('click', quitGame);
+        checkBtn.addEventListener('click', checkAnswer);
+        skipBtn.addEventListener('click', skipPokemon);
+
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && gameActive && !showingFeedback) {
+                checkAnswer();
+            }
+        });
+
+        // Music toggle functionality
+        const musicToggle = document.getElementById('music-toggle');
+        const menuMusic = document.getElementById('menu-music');
+        const battleMusic = document.getElementById('battle-music');
+        const victoryMusic = document.getElementById('victory-music');
+        let musicPlaying = false;
+        let currentMusic = menuMusic;
+
+        menuMusic.volume = 0.5;
+        battleMusic.volume = 0.5;
+        victoryMusic.volume = 0.5;
+
+        function switchMusic(newMusic) {
+            if (!musicPlaying) return;
+
+            const currentTime = currentMusic.currentTime;
+            currentMusic.pause();
+            currentMusic.currentTime = 0;
+
+            currentMusic = newMusic;
+            currentMusic.currentTime = 0;
+            currentMusic.play().catch(e => console.log('Music switch failed:', e));
+        }
+
+        musicToggle.addEventListener('click', () => {
+            if (musicPlaying) {
+                currentMusic.pause();
+                musicToggle.textContent = '🔇';
+                musicPlaying = false;
+            } else {
+                currentMusic.play().catch(e => console.log('Music play failed:', e));
+                musicToggle.textContent = '🔊';
+                musicPlaying = true;
+            }
+        });
+
+        // Auto-play music on first interaction
+        document.addEventListener('click', () => {
+            if (!musicPlaying) {
+                currentMusic.play().catch(e => console.log('Auto-play prevented:', e));
+                musicPlaying = true;
+                musicToggle.textContent = '🔊';
+            }
+        }, { once: true });
+
+        // Sprite toggle functionality
+        spriteToggle.addEventListener('click', () => {
+            useAnimatedSprites = !useAnimatedSprites;
+
+            // Update button appearance
+            if (useAnimatedSprites) {
+                spriteToggle.textContent = '🎬';
+                spriteToggle.title = 'Switch to Static';
+            } else {
+                spriteToggle.textContent = '🖼️';
+                spriteToggle.title = 'Switch to Animated';
+            }
+
+            // If we're in a game and have a current Pokemon, update the sprite
+            if (gameActive && currentPokemon) {
+                const newSprite = useAnimatedSprites ?
+                    (currentPokemon.animatedSprite || currentPokemon.staticSprite) :
+                    currentPokemon.staticSprite;
+
+                if (newSprite) {
+                    pokemonImage.src = newSprite;
+                    currentPokemon.sprite = newSprite;
+                }
+            }
+        });
+
+        // Initialize high scores when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            updateHighScoreDisplay();
+        });
+
+        // Also call immediately in case DOMContentLoaded already fired
+        if (document.readyState === 'loading') {
+            // DOM is still loading, event listener will handle it
+        } else {
+            // DOM is already loaded
+            updateHighScoreDisplay();
+        }
+    </script>
+</body>
+</html>
