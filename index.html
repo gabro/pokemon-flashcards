@@ -52,36 +52,6 @@
                 radial-gradient(circle at 50% 50%, #CC0000 0%, #CC0000 45%, #000 45%, #000 55%, #fff 55%);
         }
 
-        .game-header {
-            background: #CC0000;
-            padding: 30px 20px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            position: relative;
-            z-index: 2;
-            transition: all 0.3s ease;
-        }
-
-        .game-header.compact {
-            padding: 0;
-            max-height: 0;
-            overflow: hidden;
-            box-shadow: none;
-        }
-
-        .game-header h1 {
-            color: #FFCB05;
-            font-size: 3em;
-            margin: 0;
-            text-shadow:
-                4px 4px 0 #2a75bb,
-                -2px -2px 0 #2a75bb,
-                2px -2px 0 #2a75bb,
-                -2px 2px 0 #2a75bb,
-                2px 2px 0 #2a75bb;
-            letter-spacing: 3px;
-        }
-
         .game-container {
             flex: 1;
             display: flex;
@@ -202,6 +172,27 @@
                 inset 0 -2px 10px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             position: relative;
+        }
+
+        .pokemon-image.feedback-correct {
+            border-color: #28a745;
+            box-shadow:
+                0 8px 20px rgba(40, 167, 69, 0.4),
+                inset 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .pokemon-image.feedback-incorrect {
+            border-color: #dc3545;
+            box-shadow:
+                0 8px 20px rgba(220, 53, 69, 0.4),
+                inset 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .pokemon-image.feedback-skip {
+            border-color: #6c757d;
+            box-shadow:
+                0 8px 20px rgba(108, 117, 125, 0.4),
+                inset 0 -2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .pokemon-image.silhouette {
@@ -332,16 +323,85 @@
             box-shadow: 0 6px 20px rgba(59, 76, 202, 0.5);
         }
 
-        .feedback {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 1.1em;
-            min-height: 50px;
+        .inline-feedback {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            padding-top: 20px;
+            margin-left: 25px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .inline-feedback:not(.hidden) {
+            opacity: 1;
+        }
+
+        .feedback-emoji {
+            font-size: 2.5em;
+            animation: bounceIn 0.5s ease;
+        }
+
+        .feedback-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .feedback-text {
+            font-size: 0.85em;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .feedback-pokemon-name {
+            font-size: 1.3em;
+            font-weight: 800;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .feedback-user-answer {
+            font-size: 0.75em;
+            color: #999;
+            font-style: italic;
+            margin-top: 2px;
+        }
+
+        .inline-feedback.correct .feedback-pokemon-name {
+            color: #28a745;
+        }
+
+        .inline-feedback.incorrect .feedback-pokemon-name {
+            color: #dc3545;
+        }
+
+        .inline-feedback.skip .feedback-pokemon-name {
+            color: #6c757d;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         .loading {
@@ -970,32 +1030,77 @@
 
         .sprite-toggle {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 203, 5, 0.9);
-            border: 2px solid #3B4CCA;
-            border-radius: 8px;
-            padding: 6px 10px;
+            bottom: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(59, 76, 202, 0.3);
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 1.2em;
             transition: all 0.2s ease;
             z-index: 10;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
         }
 
         .sprite-toggle:hover {
-            background: #FFD700;
             transform: scale(1.1);
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
         }
 
         .sprite-toggle:active {
             transform: scale(0.95);
         }
 
+        .sprite-toggle:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .sprite-toggle:disabled:hover {
+            transform: none;
+        }
+
+        /* Pikachu running icon */
+        .sprite-toggle::before {
+            content: '';
+            width: 24px;
+            height: 24px;
+            background-image: url('https://cdn-icons-png.flaticon.com/512/5073/5073994.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.4;
+            transition: opacity 0.2s ease;
+        }
+
+        .sprite-toggle.animated::before {
+            opacity: 1;
+        }
+
         .pokemon-display {
             margin: 30px 0;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 250px;
+        }
+
+        .pokemon-display-image-wrapper {
+            position: relative;
+        }
+
+        .pokemon-image-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .pokemon-image-frame {
+            position: relative;
+            display: inline-block;
         }
 
         .hidden {
@@ -1014,11 +1119,6 @@
     <audio id="victory-music">
         <source src="https://jetta.vgmtreasurechest.com/soundtracks/pokemon-game-boy-pok-mon-sound-complete-set-play-cd/jtoodasn/1-16.%20Victory%20%28VS%20Trainer%29.mp3" type="audio/mpeg">
     </audio>
-
-    <!-- Game Header -->
-    <div class="game-header">
-        <h1>⚡ POKÉMON FLASHCARDS ⚡</h1>
-    </div>
 
     <div class="game-container">
         <div class="game-content">
@@ -1097,10 +1197,24 @@
             </div>
 
             <div class="pokemon-display">
-                <button class="sprite-toggle" id="sprite-toggle" title="Toggle Animation">🎬</button>
-                <div class="loading" id="loading">Loading Pokémon...</div>
-                <img id="pokemon-image" class="pokemon-image" src="" alt="Pokémon">
-                <div class="pokemon-number" id="pokemon-number"></div>
+                <div class="pokemon-display-image-wrapper">
+                    <div class="pokemon-image-container">
+                        <div class="loading" id="loading">Loading Pokémon...</div>
+                        <div class="pokemon-image-frame">
+                            <img id="pokemon-image" class="pokemon-image" src="" alt="Pokémon">
+                            <button class="sprite-toggle animated" id="sprite-toggle" title="Toggle Animation"></button>
+                        </div>
+                        <div class="pokemon-number" id="pokemon-number"></div>
+                    </div>
+                    <div class="inline-feedback hidden" id="inline-feedback">
+                        <div class="feedback-emoji" id="feedback-emoji"></div>
+                        <div class="feedback-content">
+                            <div class="feedback-text" id="feedback-text"></div>
+                            <div class="feedback-pokemon-name" id="feedback-pokemon-name"></div>
+                            <div class="feedback-user-answer" id="feedback-user-answer"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="input-section">
@@ -1110,8 +1224,6 @@
                     <button class="skip-btn" id="skip-btn">Skip</button>
                 </div>
             </div>
-
-            <div class="feedback hidden" id="feedback"></div>
 
             <button class="quit-button" id="quit-button">Quit to Menu</button>
         </div>
@@ -1170,7 +1282,6 @@
         const menuScreen = document.getElementById('menu-screen');
         const gameScreen = document.getElementById('game-screen');
         const gameOverScreen = document.getElementById('game-over-screen');
-        const gameHeader = document.querySelector('.game-header');
         const startButton = document.getElementById('start-button');
         const playAgainButton = document.getElementById('play-again-button');
         const menuButton = document.getElementById('menu-button');
@@ -1278,11 +1389,13 @@
             }
 
             // Update sprite toggle to show correct state
-            spriteToggle.textContent = useAnimatedSprites ? '🎬' : '🖼️';
-            spriteToggle.title = useAnimatedSprites ? 'Switch to Static' : 'Switch to Animated';
-
-            // Hide header during gameplay
-            gameHeader.classList.add('compact');
+            if (useAnimatedSprites) {
+                spriteToggle.classList.add('animated');
+                spriteToggle.title = 'Switch to Static';
+            } else {
+                spriteToggle.classList.remove('animated');
+                spriteToggle.title = 'Switch to Animated';
+            }
 
             // Switch to battle music
             switchMusic(battleMusic);
@@ -1324,9 +1437,6 @@
             gameScreen.classList.add('hidden');
             gameOverScreen.classList.remove('hidden');
 
-            // Show header again
-            gameHeader.classList.remove('compact');
-
             // Play victory music, then switch to menu music
             switchMusic(victoryMusic);
 
@@ -1355,9 +1465,6 @@
 
             // Hide generation display
             generationDisplay.classList.add('hidden');
-
-            // Show header again
-            gameHeader.classList.remove('compact');
 
             // Switch back to menu music (if coming from quit)
             if (currentMusic !== menuMusic) {
@@ -1441,16 +1548,18 @@
                 // Enable/disable sprite toggle based on animated sprite availability
                 if (currentPokemon.animatedSprite) {
                     spriteToggle.disabled = false;
-                    spriteToggle.style.opacity = '1';
-                    spriteToggle.style.cursor = 'pointer';
-                    spriteToggle.title = useAnimatedSprites ? 'Switch to Static' : 'Switch to Animated';
+                    if (useAnimatedSprites) {
+                        spriteToggle.classList.add('animated');
+                        spriteToggle.title = 'Switch to Static';
+                    } else {
+                        spriteToggle.classList.remove('animated');
+                        spriteToggle.title = 'Switch to Animated';
+                    }
                 } else {
                     spriteToggle.disabled = true;
-                    spriteToggle.style.opacity = '0.5';
-                    spriteToggle.style.cursor = 'not-allowed';
                     // Force to static sprite if no animated sprite available
                     useAnimatedSprites = false;
-                    spriteToggle.textContent = '🖼️';
+                    spriteToggle.classList.remove('animated');
                     spriteToggle.title = 'No animation available';
                 }
 
@@ -1501,45 +1610,72 @@
             }
         }
 
-        function showFullscreenFeedback(type, pokemonName, wasTypo = false, userAnswer = '') {
-            const overlay = document.getElementById('fullscreen-overlay');
-            const emoji = document.getElementById('result-emoji');
-            const text = document.getElementById('result-text');
-            const pokeName = document.getElementById('result-pokemon-name');
-            const userAnswerDiv = document.getElementById('result-user-answer');
+        function showInlineFeedback(type, pokemonName, wasTypo = false, userAnswer = '') {
+            const feedback = document.getElementById('inline-feedback');
+            const emoji = document.getElementById('feedback-emoji');
+            const text = document.getElementById('feedback-text');
+            const pokeName = document.getElementById('feedback-pokemon-name');
+            const userAnswerDiv = document.getElementById('feedback-user-answer');
 
-            overlay.className = 'fullscreen-overlay ' + type;
-            userAnswerDiv.textContent = ''; // Clear previous
+            feedback.className = 'inline-feedback ' + type;
+
+            // Add border color class to pokemon image
+            pokemonImage.classList.add('feedback-' + type);
+
+            // Clear user answer by default
+            userAnswerDiv.textContent = '';
 
             if (type === 'correct') {
-                emoji.textContent = '🎉';
+                const correctMessages = [
+                    'That\'s right!',
+                    'You got it!',
+                    'Excellent!',
+                    'Perfect!',
+                    'Nice work!',
+                    'Well done!',
+                    'Spot on!',
+                    'Great job!'
+                ];
+                const correctEmojis = ['🎉', '⭐', '✨', '🌟', '👏', '🎊'];
+
+                emoji.textContent = correctEmojis[Math.floor(Math.random() * correctEmojis.length)];
                 if (wasTypo) {
                     text.textContent = 'CLOSE ENOUGH!';
-                    pokeName.textContent = capitalize(pokemonName);
+                    pokeName.textContent = `It's ${capitalize(pokemonName)}!`;
                     userAnswerDiv.textContent = `(You wrote: "${capitalize(userAnswer)}")`;
                 } else {
-                    text.textContent = 'CORRECT!';
-                    pokeName.textContent = capitalize(pokemonName);
+                    text.textContent = correctMessages[Math.floor(Math.random() * correctMessages.length)].toUpperCase();
+                    pokeName.textContent = `It's ${capitalize(pokemonName)}!`;
                 }
                 createConfetti();
             } else if (type === 'incorrect') {
-                emoji.textContent = '😅';
-                text.textContent = 'NOT QUITE!';
-                pokeName.textContent = capitalize(pokemonName);
+                const incorrectMessages = [
+                    'Not quite!',
+                    'Oops!',
+                    'So close!',
+                    'Almost!',
+                    'Nice try!'
+                ];
+                const incorrectEmojis = ['😅', '😊', '🤔', '💭'];
+
+                emoji.textContent = incorrectEmojis[Math.floor(Math.random() * incorrectEmojis.length)];
+                text.textContent = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)].toUpperCase();
+                pokeName.textContent = `It was ${capitalize(pokemonName)}!`;
             } else if (type === 'skip') {
                 emoji.textContent = '💭';
                 text.textContent = 'IT WAS...';
                 pokeName.textContent = capitalize(pokemonName);
             }
 
-            setTimeout(() => overlay.classList.add('show'), 10);
+            feedback.classList.remove('hidden');
+        }
 
-            setTimeout(() => {
-                overlay.classList.remove('show');
-                setTimeout(() => {
-                    overlay.className = 'fullscreen-overlay';
-                }, 200);
-            }, 1200);
+        function hideInlineFeedback() {
+            const feedback = document.getElementById('inline-feedback');
+            feedback.classList.add('hidden');
+
+            // Remove border color classes from pokemon image
+            pokemonImage.classList.remove('feedback-correct', 'feedback-incorrect', 'feedback-skip');
         }
 
         function checkAnswer() {
@@ -1576,25 +1712,28 @@
             if (isExactMatch || isFuzzyMatch) {
                 correctCount++;
                 correctScore.textContent = correctCount;
-                showFullscreenFeedback('correct', currentPokemon.name, isFuzzyMatch, userAnswer);
+                showInlineFeedback('correct', currentPokemon.name, isFuzzyMatch, userAnswer);
 
                 setTimeout(() => {
+                    hideInlineFeedback();
                     showingFeedback = false;
                     nextRound();
                 }, feedbackDuration);
             } else {
                 incorrectCount++;
                 incorrectScore.textContent = incorrectCount;
-                showFullscreenFeedback('incorrect', currentPokemon.name);
+                showInlineFeedback('incorrect', currentPokemon.name);
 
                 // In streak mode, end game on first incorrect answer
                 if (gameMode === 'streak') {
                     setTimeout(() => {
+                        hideInlineFeedback();
                         showingFeedback = false;
                         endGame();
                     }, feedbackDuration);
                 } else {
                     setTimeout(() => {
+                        hideInlineFeedback();
                         showingFeedback = false;
                         nextRound();
                     }, feedbackDuration);
@@ -1623,7 +1762,7 @@
 
             incorrectCount++;
             incorrectScore.textContent = incorrectCount;
-            showFullscreenFeedback('skip', currentPokemon.name);
+            showInlineFeedback('skip', currentPokemon.name);
 
             // In silhouette mode, give more time to see the revealed Pokémon
             const feedbackDuration = gameMode === 'silhouette' ? 2500 : 1400;
@@ -1631,11 +1770,13 @@
             // In streak mode, end game on skip
             if (gameMode === 'streak') {
                 setTimeout(() => {
+                    hideInlineFeedback();
                     showingFeedback = false;
                     endGame();
                 }, feedbackDuration);
             } else {
                 setTimeout(() => {
+                    hideInlineFeedback();
                     showingFeedback = false;
                     nextRound();
                 }, feedbackDuration);
@@ -1757,12 +1898,17 @@
         const menuMusic = document.getElementById('menu-music');
         const battleMusic = document.getElementById('battle-music');
         const victoryMusic = document.getElementById('victory-music');
-        let musicPlaying = false;
+
+        // Load music preference from localStorage
+        let musicPlaying = localStorage.getItem('musicEnabled') === 'true';
         let currentMusic = menuMusic;
 
         menuMusic.volume = 0.5;
         battleMusic.volume = 0.5;
         victoryMusic.volume = 0.5;
+
+        // Set initial button state based on saved preference
+        musicToggle.textContent = musicPlaying ? '🔊' : '🔇';
 
         function switchMusic(newMusic) {
             if (!musicPlaying) return;
@@ -1781,19 +1927,19 @@
                 currentMusic.pause();
                 musicToggle.textContent = '🔇';
                 musicPlaying = false;
+                localStorage.setItem('musicEnabled', 'false');
             } else {
                 currentMusic.play().catch(e => console.log('Music play failed:', e));
                 musicToggle.textContent = '🔊';
                 musicPlaying = true;
+                localStorage.setItem('musicEnabled', 'true');
             }
         });
 
-        // Auto-play music on first interaction
+        // Auto-play music on first interaction (only if user has enabled music)
         document.addEventListener('click', () => {
-            if (!musicPlaying) {
+            if (musicPlaying && !currentMusic.currentTime) {
                 currentMusic.play().catch(e => console.log('Auto-play prevented:', e));
-                musicPlaying = true;
-                musicToggle.textContent = '🔊';
             }
         }, { once: true });
 
@@ -1803,10 +1949,10 @@
 
             // Update button appearance
             if (useAnimatedSprites) {
-                spriteToggle.textContent = '🎬';
+                spriteToggle.classList.add('animated');
                 spriteToggle.title = 'Switch to Static';
             } else {
-                spriteToggle.textContent = '🖼️';
+                spriteToggle.classList.remove('animated');
                 spriteToggle.title = 'Switch to Animated';
             }
 
