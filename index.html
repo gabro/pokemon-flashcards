@@ -754,6 +754,7 @@
 
         .generation-option {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 10px;
@@ -775,6 +776,18 @@
             border-color: #3B4CCA;
             color: white;
             font-weight: bold;
+        }
+
+        .generation-option .region-name {
+            display: block;
+        }
+
+        .generation-option .gen-label {
+            display: block;
+            opacity: 0.6;
+            font-size: 0.85em;
+            font-weight: normal;
+            margin-top: 2px;
         }
 
         .generation-option input[type="checkbox"] {
@@ -1043,15 +1056,15 @@
                 <div class="generation-selector-title collapsed" id="generation-selector-title">Select Generations</div>
                 <div class="generation-selector-content collapsed" id="generation-selector-content">
                     <div class="generation-options" id="generation-options">
-                        <div class="generation-option selected" data-gen="1">Kanto <span style="opacity: 0.6; font-size: 0.85em;">Gen I</span></div>
-                        <div class="generation-option selected" data-gen="2">Johto <span style="opacity: 0.6; font-size: 0.85em;">Gen II</span></div>
-                        <div class="generation-option selected" data-gen="3">Hoenn <span style="opacity: 0.6; font-size: 0.85em;">Gen III</span></div>
-                        <div class="generation-option selected" data-gen="4">Sinnoh <span style="opacity: 0.6; font-size: 0.85em;">Gen IV</span></div>
-                        <div class="generation-option selected" data-gen="5">Unova <span style="opacity: 0.6; font-size: 0.85em;">Gen V</span></div>
-                        <div class="generation-option selected" data-gen="6">Kalos <span style="opacity: 0.6; font-size: 0.85em;">Gen VI</span></div>
-                        <div class="generation-option selected" data-gen="7">Alola <span style="opacity: 0.6; font-size: 0.85em;">Gen VII</span></div>
-                        <div class="generation-option selected" data-gen="8">Galar <span style="opacity: 0.6; font-size: 0.85em;">Gen VIII</span></div>
-                        <div class="generation-option selected" data-gen="9">Paldea <span style="opacity: 0.6; font-size: 0.85em;">Gen IX</span></div>
+                        <div class="generation-option selected" data-gen="1"><span class="region-name">Kanto</span><span class="gen-label">Gen I</span></div>
+                        <div class="generation-option selected" data-gen="2"><span class="region-name">Johto</span><span class="gen-label">Gen II</span></div>
+                        <div class="generation-option selected" data-gen="3"><span class="region-name">Hoenn</span><span class="gen-label">Gen III</span></div>
+                        <div class="generation-option selected" data-gen="4"><span class="region-name">Sinnoh</span><span class="gen-label">Gen IV</span></div>
+                        <div class="generation-option selected" data-gen="5"><span class="region-name">Unova</span><span class="gen-label">Gen V</span></div>
+                        <div class="generation-option selected" data-gen="6"><span class="region-name">Kalos</span><span class="gen-label">Gen VI</span></div>
+                        <div class="generation-option selected" data-gen="7"><span class="region-name">Alola</span><span class="gen-label">Gen VII</span></div>
+                        <div class="generation-option selected" data-gen="8"><span class="region-name">Galar</span><span class="gen-label">Gen VIII</span></div>
+                        <div class="generation-option selected" data-gen="9"><span class="region-name">Paldea</span><span class="gen-label">Gen IX</span></div>
                     </div>
                     <button class="select-all-btn" id="select-all-btn">Deselect All</button>
                 </div>
