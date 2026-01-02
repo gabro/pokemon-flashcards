@@ -1234,6 +1234,334 @@
         .hidden {
             display: none;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+            }
+
+            body::before,
+            body::after {
+                width: 200px;
+                height: 200px;
+            }
+
+            body::before {
+                top: -100px;
+                left: -100px;
+            }
+
+            body::after {
+                bottom: -100px;
+                right: -100px;
+            }
+
+            .game-container {
+                padding: 15px;
+                width: 100%;
+            }
+
+            .game-content {
+                padding: 25px 15px;
+                border-radius: 20px;
+                border-width: 4px;
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .game-content::before {
+                width: 40px;
+                height: 40px;
+                top: -20px;
+            }
+
+            .game-content::after {
+                width: 15px;
+                height: 15px;
+                top: -7.5px;
+            }
+
+            .title {
+                font-size: 1.8em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .score {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .score-item {
+                width: 100%;
+                padding: 8px 15px;
+            }
+
+            .score-label {
+                font-size: 0.75em;
+            }
+
+            .score-value {
+                font-size: 1.5em;
+            }
+
+            .pokemon-display {
+                min-height: 200px;
+                margin: 20px 0;
+            }
+
+            .pokemon-display-image-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+
+            .pokemon-image {
+                width: 200px;
+                height: 200px;
+                padding: 15px;
+            }
+
+            .inline-feedback {
+                position: static;
+                margin-top: 15px;
+                padding-top: 0;
+                margin-left: 0;
+            }
+
+            .feedback-emoji {
+                font-size: 2em;
+            }
+
+            .feedback-text {
+                font-size: 1em;
+            }
+
+            .feedback-pokemon-name {
+                font-size: 1em;
+            }
+
+            .input-section input {
+                font-size: 1em;
+                padding: 12px;
+            }
+
+            .buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .check-btn,
+            .skip-btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 1em;
+            }
+
+            .mode-selector {
+                padding: 20px 15px;
+            }
+
+            .mode-options {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .mode-option {
+                padding: 15px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .mode-option-icon {
+                width: 50px;
+                height: 50px;
+            }
+
+            .icon-classic::before {
+                font-size: 24px;
+            }
+
+            .mode-option-title {
+                font-size: 1.1em;
+            }
+
+            .mode-option-description {
+                font-size: 0.8em;
+            }
+
+            .generation-selector-container {
+                padding: 15px;
+            }
+
+            .generation-selector {
+                gap: 6px;
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .generation-option {
+                padding: 8px 6px;
+                font-size: 0.75em;
+            }
+
+            .generation-option .region-name {
+                font-size: 0.85em;
+            }
+
+            .generation-option .gen-label {
+                font-size: 0.7em;
+            }
+
+            .select-all-btn {
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+
+            .start-button {
+                font-size: 1em;
+                padding: 12px 30px;
+            }
+
+            .game-over-screen {
+                padding: 30px 20px;
+            }
+
+            .game-over-title {
+                font-size: 2em;
+            }
+
+            .final-score-value {
+                font-size: 3em;
+            }
+
+            .share-button,
+            .play-again-button,
+            .menu-button {
+                font-size: 1em;
+                padding: 12px 25px;
+            }
+
+            .share-preview-box {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .share-preview-box h3 {
+                font-size: 1.2em;
+            }
+
+            .share-preview-text {
+                font-size: 0.85em;
+                padding: 15px;
+            }
+
+            .share-copy-button,
+            .share-close-button {
+                font-size: 0.9em;
+                padding: 10px 20px;
+            }
+
+            .music-toggle {
+                font-size: 1.5em;
+                width: 45px;
+                height: 45px;
+            }
+
+            .quit-button {
+                font-size: 0.85em;
+                padding: 8px 18px;
+            }
+
+            .round-counter {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 10px;
+            }
+
+            .game-content {
+                padding: 20px 12px;
+            }
+
+            .title {
+                font-size: 1.4em;
+            }
+
+            .subtitle {
+                font-size: 0.75em;
+            }
+
+            .pokemon-image {
+                width: 180px;
+                height: 180px;
+                padding: 12px;
+            }
+
+            .mode-selector {
+                padding: 15px 10px;
+            }
+
+            .mode-options {
+                gap: 10px;
+            }
+
+            .mode-option {
+                padding: 12px;
+            }
+
+            .mode-option-icon {
+                width: 45px;
+                height: 45px;
+            }
+
+            .icon-classic::before {
+                font-size: 20px;
+            }
+
+            .mode-option-title {
+                font-size: 1em;
+            }
+
+            .mode-option-description {
+                font-size: 0.75em;
+            }
+
+            .generation-selector {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 5px;
+            }
+
+            .generation-option {
+                padding: 6px 4px;
+                font-size: 0.7em;
+            }
+
+            .generation-option .region-name {
+                font-size: 0.8em;
+            }
+
+            .generation-option .gen-label {
+                font-size: 0.65em;
+            }
+
+            .share-preview-buttons {
+                flex-direction: column;
+            }
+
+            .share-copy-button,
+            .share-close-button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1421,6 +1749,7 @@
         let selectedGenerations = [1, 2, 3, 4, 5, 6, 7, 8, 9]; // All generations by default
         let useAnimatedSprites = true; // Animation enabled by default
         let gameMode = 'classic'; // 'classic' or 'streak'
+        let usedPokemonIds = []; // Track used Pokemon in current game
 
         // DOM elements
         const menuScreen = document.getElementById('menu-screen');
@@ -1521,6 +1850,7 @@
             incorrectCount = 0;
             currentRound = 0;
             gameActive = true;
+            usedPokemonIds = []; // Reset used Pokemon for new game
 
             correctScore.textContent = '0';
             incorrectScore.textContent = '0';
@@ -1978,8 +2308,19 @@
                 }
             });
 
-            // Return random ID from valid IDs
-            return validIds[Math.floor(Math.random() * validIds.length)];
+            // Filter out already used Pokemon
+            const availableIds = validIds.filter(id => !usedPokemonIds.includes(id));
+
+            // If all Pokemon have been used, reset the used list (for streak mode)
+            if (availableIds.length === 0) {
+                usedPokemonIds = [];
+                return validIds[Math.floor(Math.random() * validIds.length)];
+            }
+
+            // Return random ID from available IDs
+            const randomId = availableIds[Math.floor(Math.random() * availableIds.length)];
+            usedPokemonIds.push(randomId);
+            return randomId;
         }
 
         // Mode selector logic

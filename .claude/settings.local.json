@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth:*)",
+      "Bash(wrangler --version:*)",
+      "Bash(CLOUDFLARE_ACCOUNT_ID=564b52099a35bcbe51054d7dde2fcad4 wrangler pages project list:*)"
+    ]
+  }
+}
